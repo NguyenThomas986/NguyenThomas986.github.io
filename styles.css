@@ -337,6 +337,17 @@
     transition: opacity 0.15s;
   }
 
+  .project-link svg {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.project-link:hover svg {
+  transform: translateY(-1px);
+  opacity: 0.7;
+}
+
   .project-link:hover { opacity: 0.7; }
 
   .project-date {
@@ -554,3 +565,6 @@
     footer { flex-direction: column; gap: 0.5rem; }
     .projects-grid { margin: 0; }
   }
+
+
+
