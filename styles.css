@@ -530,24 +530,22 @@
     font-size: 12px;
     letter-spacing: 0.04em;
   }
-  .footer-socials {
+ .footer-socials {
   display: flex;
-  gap: 1rem;
+  gap: 1.25rem;
   align-items: center;
 }
 
 .footer-socials a {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: inherit;
-  opacity: 0.6;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  color: var(--muted);
+  opacity: 0.7;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .footer-socials a:hover {
   opacity: 1;
-  transform: translateY(-1px);
+  color: var(--text); /* or whatever your main text variable is */
 }
 
   /* ── AVAILABILITY BADGE ── */
