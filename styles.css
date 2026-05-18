@@ -530,6 +530,25 @@
     font-size: 12px;
     letter-spacing: 0.04em;
   }
+  .footer-socials {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.footer-socials a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.footer-socials a:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
 
   /* ── AVAILABILITY BADGE ── */
   .avail-badge {
