@@ -544,6 +544,10 @@
   transition: opacity 0.2s ease, color 0.2s ease;
 }
 
+.footer-socials svg {
+  vertical-align: middle;
+}
+
 .footer-socials a:hover {
   opacity: 1;
   color: var(--text);
