@@ -735,21 +735,16 @@
      SOCIAL DOCK
      ============================================================ */
   .dock {
-    position: fixed;
-    bottom: 1.5rem; left: 50%;
-    transform: translateX(-50%);
-    z-index: 400;
-    display: flex; align-items: flex-end; gap: 10px;
+    display: inline-flex; align-items: flex-end; gap: 10px;
     padding: 10px 14px;
     border: 1px solid var(--border);
     border-radius: 18px;
     background: var(--surface);
     background: color-mix(in srgb, var(--surface) 82%, transparent);
     backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-    transition: gap 0.3s ease, padding 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
   }
-  .dock:hover { gap: 18px; padding-left: 22px; padding-right: 22px; }
+  /* dock magnify is handled in script.js */
   .dock-item {
     position: relative;
     display: flex; align-items: center; justify-content: center;
@@ -759,9 +754,10 @@
     background: var(--bg);
     color: var(--muted);
     text-decoration: none;
-    transition: transform 0.2s cubic-bezier(.2,.8,.2,1), color 0.2s, border-color 0.2s;
+    transform-origin: center bottom;
+    transition: transform 0.12s cubic-bezier(.2,.8,.2,1), color 0.2s, border-color 0.2s;
   }
-  .dock-item:hover { transform: translateY(-8px) scale(1.15); color: var(--accent); border-color: var(--accent); }
+  .dock-item:hover { color: var(--accent); border-color: var(--accent); }
   .dock-item svg { width: 22px; height: 22px; display: block; }
   .dock-tip {
     position: absolute; top: -34px; left: 50%;
@@ -775,8 +771,7 @@
   .dock-item:hover .dock-tip { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 768px) {
-    .dock { bottom: 1rem; gap: 8px; padding: 8px 10px; }
-    .dock:hover { gap: 12px; padding-left: 14px; padding-right: 14px; }
+    .dock { gap: 8px; padding: 8px 10px; }
     .dock-item { width: 38px; height: 38px; }
     .dock-item svg { width: 19px; height: 19px; }
   }
