@@ -755,9 +755,9 @@
     color: var(--muted);
     text-decoration: none;
     transform-origin: center bottom;
-    transition: transform 0.12s cubic-bezier(.2,.8,.2,1), color 0.2s, border-color 0.2s;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), color 0.2s, border-color 0.2s;
   }
-  .dock-item:hover { color: var(--accent); border-color: var(--accent); }
+  .dock-item:hover { transform: translateY(-10px) scale(1.4); color: var(--accent); border-color: var(--accent); }
   .dock-item svg { width: 22px; height: 22px; display: block; }
   .dock-tip {
     position: absolute; top: -34px; left: 50%;

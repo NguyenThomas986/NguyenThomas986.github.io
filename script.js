@@ -249,36 +249,3 @@
   input.addEventListener('input', () => { active = 0; render(filtered()); });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 })();
-
-
-/* ============================================================
-   DOCK MAGNIFY  (macOS-style proximity scaling)
-   ============================================================ */
-(function() {
-  const dock = document.querySelector('.dock');
-  if (!dock) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (window.matchMedia('(hover: none)').matches) return; // skip touch
-
-  const items = Array.from(dock.querySelectorAll('.dock-item'));
-  const MAX_SCALE = 1.55;   // size of the icon directly under the cursor
-  const RANGE = 110;        // px of influence on each side of the cursor
-  const MAX_LIFT = 14;      // px the peak icon rises
-
-  function magnify(cursorX) {
-    items.forEach((item) => {
-      const rect = item.getBoundingClientRect();
-      const center = rect.left + rect.width / 2;
-      const dist = Math.abs(cursorX - center);
-      let t = Math.max(0, 1 - dist / RANGE); // 0..1, closer = higher
-      t = t * t * (3 - 2 * t);               // smoothstep for a soft falloff
-      const scale = 1 + (MAX_SCALE - 1) * t;
-      const lift = -MAX_LIFT * t;
-      item.style.transform = `translateY(${lift}px) scale(${scale})`;
-    });
-  }
-  function reset() { items.forEach((item) => { item.style.transform = ''; }); }
-
-  dock.addEventListener('mousemove', (e) => magnify(e.clientX));
-  dock.addEventListener('mouseleave', reset);
-})();
