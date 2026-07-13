@@ -116,3 +116,136 @@
   fetchReal();
 })();
 
+
+
+
+
+/* ============================================================
+   THEME TOGGLE
+   ============================================================ */
+(function() {
+  const root = document.documentElement;
+  const btn = document.getElementById('theme-btn');
+  const sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  const moonIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  function setIcon(theme) { if (btn) btn.innerHTML = theme === 'dark' ? sunIcon : moonIcon; }
+  setIcon(root.getAttribute('data-theme') || 'dark');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      setIcon(next);
+    });
+  }
+})();
+
+
+/* ============================================================
+   CUSTOM CURSOR  (dot + trailing ring, expands over links)
+   ============================================================ */
+(function() {
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!fine) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.documentElement.classList.add('has-custom-cursor');
+  const dot = document.createElement('div'); dot.className = 'cursor-dot';
+  const ring = document.createElement('div'); ring.className = 'cursor-ring';
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+
+  let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+
+  addEventListener('mousemove', (e) => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+    if (reduce) { ring.style.left = mx + 'px'; ring.style.top = my + 'px'; }
+  });
+
+  if (!reduce) {
+    (function loop() {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  const interactive = 'a, button, input, .dock-item, .search-result, .tag, .contact-row, .project-link';
+  addEventListener('mouseover', (e) => {
+    if (e.target.closest(interactive)) { ring.classList.add('is-hovering'); dot.classList.add('is-hovering'); }
+  });
+  addEventListener('mouseout', (e) => {
+    if (e.target.closest(interactive)) { ring.classList.remove('is-hovering'); dot.classList.remove('is-hovering'); }
+  });
+})();
+
+
+/* ============================================================
+   SECTION SEARCH  (nav button or Cmd/Ctrl+K)
+   ============================================================ */
+(function() {
+  const sections = [
+    { name: 'Home',           hint: 'top',           id: 'home' },
+    { name: 'About',          hint: 'section 01',    id: 'about' },
+    { name: 'GitHub activity',hint: 'contributions', id: 'gh-strip' },
+    { name: 'Projects',       hint: 'section 02',    id: 'projects' },
+    { name: 'Contact',        hint: 'section 03',    id: 'contact' },
+    { name: 'Resume',         hint: 'opens pdf',     href: 'Resume.pdf' }
+  ];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'search-overlay';
+  overlay.innerHTML =
+    '<div class="search-box" role="dialog" aria-modal="true" aria-label="Jump to a section">' +
+      '<input class="search-input" type="text" placeholder="Jump to a section\u2026" aria-label="Search sections">' +
+      '<ul class="search-results"></ul>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  const input = overlay.querySelector('.search-input');
+  const list = overlay.querySelector('.search-results');
+  let active = 0;
+
+  function filtered() {
+    const q = input.value.trim().toLowerCase();
+    if (!q) return sections;
+    return sections.filter(s => (s.name + ' ' + s.hint).toLowerCase().includes(q));
+  }
+  function render(items) {
+    list.innerHTML = '';
+    if (!items.length) { list.innerHTML = '<li class="search-empty">No sections match that.</li>'; return; }
+    items.forEach((it, i) => {
+      const li = document.createElement('li');
+      li.className = 'search-result' + (i === active ? ' active' : '');
+      li.innerHTML = '<span>' + it.name + '</span><span class="sr-hint">' + it.hint + '</span>';
+      li.addEventListener('click', () => go(it));
+      list.appendChild(li);
+    });
+  }
+  function go(it) {
+    close();
+    if (it.href) { window.open(it.href, '_blank'); return; }
+    const el = document.getElementById(it.id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+  function open() { overlay.classList.add('open'); input.value = ''; active = 0; render(sections); input.focus(); }
+  function close() { overlay.classList.remove('open'); }
+
+  const searchBtn = document.getElementById('search-btn');
+  if (searchBtn) searchBtn.addEventListener('click', open);
+
+  addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); open(); return; }
+    if (!overlay.classList.contains('open')) return;
+    const items = filtered();
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowDown') { e.preventDefault(); active = Math.min(active + 1, items.length - 1); render(items); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); active = Math.max(active - 1, 0); render(items); }
+    else if (e.key === 'Enter')     { if (items[active]) go(items[active]); }
+  });
+  input.addEventListener('input', () => { active = 0; render(filtered()); });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+})();
