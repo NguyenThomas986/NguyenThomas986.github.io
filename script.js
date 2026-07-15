@@ -252,25 +252,30 @@
 
 
 /* ============================================================
-   GLITCH TYPEWRITER  (hero paragraph)
+   GLITCH TYPEWRITER  (hero title, then paragraph)
    ============================================================ */
 (function() {
-  const el = document.getElementById('hero-typewriter');
-  if (!el) return;
+  const els = [
+    document.getElementById('hero-title-typewriter'),
+    document.getElementById('hero-typewriter')
+  ].filter(Boolean);
+  if (!els.length) return;
 
-  // Normalize whitespace from the HTML source
-  const full = el.textContent.replace(/\s+/g, ' ').trim();
+  // Capture the source text before clearing anything
+  const lines = els.map(el => ({ el, text: el.textContent.replace(/\s+/g, ' ').trim() }));
 
   // Reduced motion: show the finished text, no animation
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    el.textContent = full;
+    lines.forEach(l => { l.el.textContent = l.text; });
     return;
   }
 
   const GLITCH = '!<>-_\\/[]{}=+*^?#$%&@~';
-  const SCRAMBLE_LEN = 3;   // how many unsettled chars trail the cursor
-  const MIN_DELAY = 16;     // fastest keystroke (ms)
-  const MAX_DELAY = 55;     // slowest keystroke (ms)
+  const SCRAMBLE_LEN = 3;    // unsettled chars trailing the cursor
+  const MIN_DELAY = 34;      // fastest keystroke (ms)
+  const MAX_DELAY = 92;      // slowest keystroke (ms)
+  const START_PAUSE = 400;   // beat before the title starts
+  const LINE_PAUSE = 500;    // beat between title and paragraph
 
   function esc(s) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -281,31 +286,73 @@
     return out;
   }
 
-  const textSpan = document.createElement('span');
-  const caret = document.createElement('span');
-  caret.className = 'typewriter-caret';
-  caret.setAttribute('aria-hidden', 'true');
+  // Clear both lines up front so the paragraph doesn't sit there while the title types
+  lines.forEach(l => { l.el.textContent = ''; l.el.setAttribute('aria-label', l.text); });
 
-  el.textContent = '';
-  el.setAttribute('aria-label', full);   // screen readers get the whole line
-  el.appendChild(textSpan);
-  el.appendChild(caret);
+  function typeLine(line, isLast, done) {
+    const textSpan = document.createElement('span');
+    const caret = document.createElement('span');
+    caret.className = 'typewriter-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    line.el.appendChild(textSpan);
+    line.el.appendChild(caret);
 
-  let i = 0;
-  function step() {
-    const settled = full.slice(0, i);
-    const remaining = full.length - i;
-    const scrambleLen = Math.min(SCRAMBLE_LEN, remaining);
-    const scramble = scrambleLen ? randGlitch(scrambleLen) : '';
+    let i = 0;
+    (function step() {
+      const settled = line.text.slice(0, i);
+      const remaining = line.text.length - i;
+      const scrambleLen = Math.min(SCRAMBLE_LEN, remaining);
+      const scramble = scrambleLen ? randGlitch(scrambleLen) : '';
 
-    textSpan.innerHTML = esc(settled) +
-      (scramble ? '<span class="glitch-char">' + esc(scramble) + '</span>' : '');
+      textSpan.innerHTML = esc(settled) +
+        (scramble ? '<span class="glitch-char">' + esc(scramble) + '</span>' : '');
 
-    if (i >= full.length) return;   // done; caret keeps blinking
-    i++;
-    setTimeout(step, MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY));
+      if (i >= line.text.length) {
+        if (!isLast) caret.remove();   // caret moves on to the next line
+        done();
+        return;
+      }
+      i++;
+      setTimeout(step, MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY));
+    })();
   }
 
-  // Small beat before it starts
-  setTimeout(step, 400);
+  let idx = 0;
+  function next() {
+    if (idx >= lines.length) return;
+    const line = lines[idx];
+    const isLast = idx === lines.length - 1;
+    idx++;
+    typeLine(line, isLast, () => { if (!isLast) setTimeout(next, LINE_PAUSE); });
+  }
+  setTimeout(next, START_PAUSE);
+})();
+
+/* ============================================================
+   INTERACTIVE GRID  (spotlight follows the cursor)
+   ============================================================ */
+(function() {
+  const hero = document.querySelector('.hero');
+  const glow = document.querySelector('.hero-grid-glow');
+  if (!hero || !glow) return;
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let x = 0, y = 0, queued = false;
+
+  function paint() {
+    queued = false;
+    glow.style.setProperty('--gx', x + 'px');
+    glow.style.setProperty('--gy', y + 'px');
+  }
+
+  hero.addEventListener('mousemove', (e) => {
+    const rect = hero.getBoundingClientRect();
+    x = e.clientX - rect.left;
+    y = e.clientY - rect.top;
+    hero.classList.add('grid-live');
+    if (!queued) { queued = true; requestAnimationFrame(paint); }
+  });
+
+  hero.addEventListener('mouseleave', () => hero.classList.remove('grid-live'));
 })();

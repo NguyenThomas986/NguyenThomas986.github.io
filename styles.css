@@ -90,7 +90,7 @@
       linear-gradient(rgba(45,90,61,0.07) 1px, transparent 1px),
       linear-gradient(90deg, rgba(45,90,61,0.07) 1px, transparent 1px);
     background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 60% at 20% 50%, black 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
     pointer-events: none;
   }
 
@@ -793,7 +793,7 @@
      ============================================================ */
 
   /* Lift all hero content above the grid background */
-  .hero > *:not(.hero-grid-bg) { position: relative; z-index: 1; }
+  .hero > *:not(.hero-grid-bg):not(.hero-grid-glow) { position: relative; z-index: 1; }
 
   /* Center the hero block */
   .hero { align-items: center; text-align: center; }
@@ -810,6 +810,7 @@
     color: var(--text);
     max-width: none;
     margin-bottom: 1.25rem;
+    min-height: 1.1em;
   }
 
   /* Typewriter line */
@@ -821,7 +822,8 @@
 
   .typewriter-caret {
     display: inline-block;
-    width: 2px;
+    width: 0.07em;
+    min-width: 2px;
     height: 1.05em;
     background: var(--accent);
     margin-left: 3px;
@@ -838,4 +840,39 @@
 
   @media (max-width: 768px) {
     .hero-desc { min-height: 8.5em; }
+  }
+
+  /* ============================================================
+     INTERACTIVE GRID  (cursor spotlight over the hero grid)
+     ============================================================ */
+  .hero-grid-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+
+    /* same 60px lattice as .hero-grid-bg, but brighter */
+    background-image:
+      linear-gradient(rgba(45,90,61,0.40) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45,90,61,0.40) 1px, transparent 1px);
+    background-size: 60px 60px;
+
+    /* only visible in a circle around the cursor */
+    --gx: -999px;
+    --gy: -999px;
+    -webkit-mask-image: radial-gradient(circle var(--gr, 190px) at var(--gx) var(--gy), #000 0%, rgba(0,0,0,0.35) 45%, transparent 70%);
+    mask-image: radial-gradient(circle var(--gr, 190px) at var(--gx) var(--gy), #000 0%, rgba(0,0,0,0.35) 45%, transparent 70%);
+  }
+
+  [data-theme="dark"] .hero-grid-glow {
+    background-image:
+      linear-gradient(rgba(108,201,138,0.55) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,201,138,0.55) 1px, transparent 1px);
+  }
+
+  .hero.grid-live .hero-grid-glow { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-grid-glow { display: none; }
   }
