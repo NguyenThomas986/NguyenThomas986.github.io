@@ -787,3 +787,55 @@
       scroll-behavior: auto !important;
     }
   }
+
+  /* ============================================================
+     HERO TITLE + CENTERED HERO + TYPEWRITER
+     ============================================================ */
+
+  /* Lift all hero content above the grid background */
+  .hero > *:not(.hero-grid-bg) { position: relative; z-index: 1; }
+
+  /* Center the hero block */
+  .hero { align-items: center; text-align: center; }
+  .hero-cta { justify-content: center; }
+  .hero-stats { justify-content: center; }
+
+  /* Title (replaces the old green hero-tag) */
+  .hero-title {
+    font-family: var(--sans);
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    max-width: none;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Typewriter line */
+  .hero-desc {
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 5.4em;   /* reserve space so nothing jumps while typing */
+  }
+
+  .typewriter-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1.05em;
+    background: var(--accent);
+    margin-left: 3px;
+    vertical-align: text-bottom;
+    animation: caret-blink 1s step-end infinite;
+  }
+
+  @keyframes caret-blink { 50% { opacity: 0; } }
+
+  .glitch-char {
+    color: var(--accent);
+    opacity: 0.75;
+  }
+
+  @media (max-width: 768px) {
+    .hero-desc { min-height: 8.5em; }
+  }

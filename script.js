@@ -249,3 +249,63 @@
   input.addEventListener('input', () => { active = 0; render(filtered()); });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
 })();
+
+
+/* ============================================================
+   GLITCH TYPEWRITER  (hero paragraph)
+   ============================================================ */
+(function() {
+  const el = document.getElementById('hero-typewriter');
+  if (!el) return;
+
+  // Normalize whitespace from the HTML source
+  const full = el.textContent.replace(/\s+/g, ' ').trim();
+
+  // Reduced motion: show the finished text, no animation
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = full;
+    return;
+  }
+
+  const GLITCH = '!<>-_\\/[]{}=+*^?#$%&@~';
+  const SCRAMBLE_LEN = 3;   // how many unsettled chars trail the cursor
+  const MIN_DELAY = 16;     // fastest keystroke (ms)
+  const MAX_DELAY = 55;     // slowest keystroke (ms)
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function randGlitch(n) {
+    let out = '';
+    for (let i = 0; i < n; i++) out += GLITCH[Math.floor(Math.random() * GLITCH.length)];
+    return out;
+  }
+
+  const textSpan = document.createElement('span');
+  const caret = document.createElement('span');
+  caret.className = 'typewriter-caret';
+  caret.setAttribute('aria-hidden', 'true');
+
+  el.textContent = '';
+  el.setAttribute('aria-label', full);   // screen readers get the whole line
+  el.appendChild(textSpan);
+  el.appendChild(caret);
+
+  let i = 0;
+  function step() {
+    const settled = full.slice(0, i);
+    const remaining = full.length - i;
+    const scrambleLen = Math.min(SCRAMBLE_LEN, remaining);
+    const scramble = scrambleLen ? randGlitch(scrambleLen) : '';
+
+    textSpan.innerHTML = esc(settled) +
+      (scramble ? '<span class="glitch-char">' + esc(scramble) + '</span>' : '');
+
+    if (i >= full.length) return;   // done; caret keeps blinking
+    i++;
+    setTimeout(step, MIN_DELAY + Math.random() * (MAX_DELAY - MIN_DELAY));
+  }
+
+  // Small beat before it starts
+  setTimeout(step, 400);
+})();
