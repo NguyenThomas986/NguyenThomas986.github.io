@@ -329,13 +329,12 @@
 })();
 
 /* ============================================================
-   INTERACTIVE GRID  (spotlight follows the cursor)
+   INTERACTIVE GRID  (spotlight follows the cursor / finger)
    ============================================================ */
 (function() {
   const hero = document.querySelector('.hero');
   const glow = document.querySelector('.hero-grid-glow');
   if (!hero || !glow) return;
-  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   let x = 0, y = 0, queued = false;
@@ -346,13 +345,30 @@
     glow.style.setProperty('--gy', y + 'px');
   }
 
-  hero.addEventListener('mousemove', (e) => {
+  function updateFromEvent(clientX, clientY) {
     const rect = hero.getBoundingClientRect();
-    x = e.clientX - rect.left;
-    y = e.clientY - rect.top;
+    x = clientX - rect.left;
+    y = clientY - rect.top;
     hero.classList.add('grid-live');
     if (!queued) { queued = true; requestAnimationFrame(paint); }
-  });
+  }
 
+  // Mouse (fine pointer devices)
+  hero.addEventListener('mousemove', (e) => {
+    updateFromEvent(e.clientX, e.clientY);
+  });
   hero.addEventListener('mouseleave', () => hero.classList.remove('grid-live'));
+
+  // Touch (phones/tablets)
+  hero.addEventListener('touchstart', (e) => {
+    const t = e.touches[0];
+    updateFromEvent(t.clientX, t.clientY);
+  }, { passive: true });
+
+  hero.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    updateFromEvent(t.clientX, t.clientY);
+  }, { passive: true });
+
+  hero.addEventListener('touchend', () => hero.classList.remove('grid-live'));
 })();
